@@ -1,0 +1,262 @@
+﻿@model  List<Employee.Models.Overtime>
+
+
+
+@Styles.Render("~/bundles/css")
+@Scripts.Render("~/bundles/js")
+@Styles.Render("~/bundles/font")
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>EmployeeView</title>
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <a class="navbar-brand">LIST OF THE OVER TIME DATA</a>
+            </div>
+        </div>
+    </nav>
+    <section>
+        <div class="row">
+            <div class="col-md-11">
+                @*<button type="button" class="btn btn-primary pull-right" id="btnAdd">Create Employee</button>*@
+                <button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#OvertimeInfo">
+                    Add New
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-offset-2 col-md-8">
+                <div>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>NO</th>
+                                <th>NIK</th>
+                                <th>Time Start</th>
+                                <th>Time Finish</th>
+                                <th>Actual Hours</th>
+                                <th>Calculate Hours</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.NIK</td>
+                                    <td>@item.TimeStart</td>
+                                    <td>@item.TimeFinish</td>
+                                    <td>@item.ActualHours</td>
+                                    <td>@item.CalculatedHours</td>
+                                    <td>
+                                        <!-- Tombol Edit -->
+                                        <button type="button" class="btn btn-warning btnEdit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <!-- Tombol Delete -->
+                                        <button type="button" class="btn btn-danger btnDelete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal fade" id="OvertimeInfo" tabindex="-1" role="dialog"  data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Over Time Detail</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>NIK</label>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.TextBox("NIK", null, new { @id = "txtNIK" }) 
+                            @*@Html.DropDownList("SelectedItemId", (IEnumerable<SelectListItem>)ViewBag.employees, "Select an option", new { @id = "cbDepartment" })*@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>Time Start</label>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.TextBox("{0:MM/dd/yyyy HH:MM}",null, new {type = "datetime-local", @id = "dtpStart"})
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>Time Finish</label>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.TextBox("{0:MM/dd/yyyy HH:MM}", null, new {type = "datetime-local",@id = "dptFinish"})
+                        </div>
+                    </div> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="ResetInput()">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSave" disabled="true">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+</html>
+
+<script>
+
+    $("#dptFinish").on('change', function () { 
+        let startTime = $("#dtpStart").val();
+        if (startTime.trim() !== "") { 
+            ValidationDateTime(startTime, $(this).val());  
+        }
+    })
+
+    $("#dtpStart").on('change', function () { 
+        let finishTime = $("#dptFinish").val()
+        if (finishTime.trim() !== "") {   
+            ValidationDateTime($(this).val(), finishTime)
+
+        }
+    })
+      
+    $("#btnSave").on('click', function () {
+
+        let Nik = $("#txtNIK").val();
+        let StartTime = $("#dtpStart").val();
+        let FinishTime = $("#dptFinish").val(); 
+        $.ajax({
+            url: $("#txtNIK").prop("disabled") ? "/OverTime/UpdateOverTime" : "/OverTime/InsertOverTime",
+            data: { NIK: Nik, StartDate: StartTime, FinishDate: FinishTime },
+            dataType: "json",
+            async: true,
+            type: "GET",
+            error: function (data) {
+                alert(`${data.message} \n ${data.message_info}`);
+            },
+            success: function (data) {
+                if (data.flag) {
+                    window.alert(data.message_info);
+                    window.location.href = data.redirectUrl
+                }
+                else {
+                    alert(`${data.message} \n ${data.message_info}`);
+                }
+            }
+        });  
+    })
+
+    $(".btnEdit").on('click', function () {
+        let row = $(this).closest("tr");
+        let NIK = row.find("td:eq(1)").text();
+        console.log(NIK)
+        $.ajax({
+            url: "/OverTime/GetOvertimeByNIK",
+            data: { NIK: NIK },
+            dataType: "json",
+            async: true,
+            type: "GET",
+            error: function (data) {
+                alert(`${data.message} \n ${data.message_info}`);
+            },
+            success: function (data) {
+                if (data.flag) {
+                    console.log(data)
+                    if (data.data != "undifined" || data.data != null) {
+                        $("#txtNIK").val(data.data.NIK);
+                        $("#txtNIK").prop("disabled", true) 
+                        $("#dtpStart").val(ConvertDatetime(data.data.TimeStart)).trigger('change');  
+                        $("#dptFinish").val(ConvertDatetime(data.data.TimeFinish)).trigger('change'); 
+                        $("#OvertimeInfo").modal('show'); 
+                    } 
+
+                }
+            }
+        });  
+    });
+
+
+    $(".btnDelete").on('click', function () {
+        let row = $(this).closest("tr");
+        let NIK = row.find("td:eq(1)").text(); 
+        $.ajax({
+            url: "/OverTime/DeleteOvertime",
+            data: { NIK: NIK },
+            dataType: "json",
+            async: true,
+            type: "GET",
+            error: function (data) {
+                alert(`${data.message} \n ${data.message_info}`);
+            },
+            success: function (data) {
+                if (data.flag) {
+                    window.alert(data.message_info);
+                    window.location.href = data.redirectUrl
+
+                }
+                else {
+                    alert(`${data.message} \n ${data.message_info}`);
+                }
+            }
+        });  
+    });
+
+    function ResetInput() {
+        $("#OvertimeInfo").find("input").each(function () {
+            let Element = $(this);
+            var inputType = $(this).attr("type");
+            Element.prop("disabled", false)
+
+            if (inputType == "text") {
+                Element.val("");
+            }
+            else if (inputType == "datetime-local") {
+                Element.val("")
+            }
+        }); 
+    }
+
+    function ConvertDatetime(date) {
+        var startdatetimeValue = new Date(parseInt(date.substr(6)));
+        var offsetMinutes = startdatetimeValue.getTimezoneOffset();
+        startdatetimeValue.setMinutes(startdatetimeValue.getMinutes() - offsetMinutes);
+        return startdatetimeValue.toISOString().slice(0, 16);
+    }
+
+    function ValidationDateTime(Timestart, TimeFinish) {
+
+        $("#btnSave").prop("disabled", true)
+        if (TimeFinish <= Timestart) {
+            alert("Cann't select date time lower from Start Date !!!!")
+            return;
+        }
+        var timeDiffInSeconds = Math.floor((Date.parse(TimeFinish) - Date.parse(Timestart)) / 1000);
+        totalHours = timeDiffInSeconds / 60 / 60;
+        if (totalHours > 3) {
+            alert("Cann't set Overtime more than 3 Hours !!!!")
+            return;
+        }
+        $("#btnSave").prop("disabled", false)
+    }
+     
+
+</script>

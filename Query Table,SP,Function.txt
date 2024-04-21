@@ -1,0 +1,514 @@
+USE [Local]
+GO
+/****** Object:  UserDefinedFunction [dbo].[SplitString]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE FUNCTION [dbo].[SplitString]
+(
+    @String NVARCHAR(MAX),
+    @Delimiter NVARCHAR(100)
+)
+RETURNS @Result TABLE (SplitValue NVARCHAR(MAX))
+AS
+BEGIN
+    DECLARE @Index INT
+    DECLARE @Slice NVARCHAR(MAX)
+
+    SET @Index = CHARINDEX(@Delimiter, @String)
+
+    WHILE @Index > 0
+    BEGIN
+        SET @Slice = SUBSTRING(@String, 1, @Index - 1)
+
+        INSERT INTO @Result (SplitValue) VALUES (@Slice)
+
+        SET @String = SUBSTRING(@String, @Index + LEN(@Delimiter), LEN(@String))
+
+        SET @Index = CHARINDEX(@Delimiter, @String)
+    END
+
+    IF LEN(@String) > 0
+    BEGIN
+        INSERT INTO @Result (SplitValue) VALUES (@String)
+    END
+
+    RETURN
+END
+GO
+/****** Object:  Table [dbo].[Allowance]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Allowance](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Desc] [nvarchar](10) NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Department]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Department](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](20) NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Employee_Allowance]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Employee_Allowance](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[EmployeeId] [int] NOT NULL,
+	[AllowanceId] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Employees]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Employees](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[NIK] [nvarchar](max) NOT NULL,
+	[Name] [nvarchar](max) NOT NULL,
+	[DepartmentId] [int] NOT NULL,
+	[PositionId] [int] NOT NULL,
+ CONSTRAINT [PK_Employee] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Overtime]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Overtime](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[NIK] [nvarchar](max) NOT NULL,
+	[TimeStart] [datetime] NOT NULL,
+	[TimeFinish] [datetime] NOT NULL,
+	[ActualHours] [int] NOT NULL,
+	[CalculatedHours] [int] NOT NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Positon]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Positon](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](20) NOT NULL
+) ON [PRIMARY]
+GO
+SET IDENTITY_INSERT [dbo].[Allowance] ON 
+GO
+INSERT [dbo].[Allowance] ([Id], [Desc]) VALUES (1, N'BPJS')
+GO
+INSERT [dbo].[Allowance] ([Id], [Desc]) VALUES (2, N'Meal')
+GO
+INSERT [dbo].[Allowance] ([Id], [Desc]) VALUES (3, N'Laptop')
+GO
+SET IDENTITY_INSERT [dbo].[Allowance] OFF
+GO
+SET IDENTITY_INSERT [dbo].[Department] ON 
+GO
+INSERT [dbo].[Department] ([Id], [Name]) VALUES (1, N'HRD')
+GO
+INSERT [dbo].[Department] ([Id], [Name]) VALUES (2, N'IT-Inhouse')
+GO
+INSERT [dbo].[Department] ([Id], [Name]) VALUES (3, N'Engineer')
+GO
+INSERT [dbo].[Department] ([Id], [Name]) VALUES (4, N'Production')
+GO
+INSERT [dbo].[Department] ([Id], [Name]) VALUES (5, N'Store')
+GO
+SET IDENTITY_INSERT [dbo].[Department] OFF
+GO
+SET IDENTITY_INSERT [dbo].[Employee_Allowance] ON 
+GO
+INSERT [dbo].[Employee_Allowance] ([Id], [EmployeeId], [AllowanceId]) VALUES (1, 3, 1)
+GO
+INSERT [dbo].[Employee_Allowance] ([Id], [EmployeeId], [AllowanceId]) VALUES (2, 3, 2)
+GO
+INSERT [dbo].[Employee_Allowance] ([Id], [EmployeeId], [AllowanceId]) VALUES (3, 3, 3)
+GO
+INSERT [dbo].[Employee_Allowance] ([Id], [EmployeeId], [AllowanceId]) VALUES (12, 4, 1)
+GO
+INSERT [dbo].[Employee_Allowance] ([Id], [EmployeeId], [AllowanceId]) VALUES (25, 1, 1)
+GO
+INSERT [dbo].[Employee_Allowance] ([Id], [EmployeeId], [AllowanceId]) VALUES (26, 1, 2)
+GO
+INSERT [dbo].[Employee_Allowance] ([Id], [EmployeeId], [AllowanceId]) VALUES (13, 4, 3)
+GO
+INSERT [dbo].[Employee_Allowance] ([Id], [EmployeeId], [AllowanceId]) VALUES (23, 5, 1)
+GO
+INSERT [dbo].[Employee_Allowance] ([Id], [EmployeeId], [AllowanceId]) VALUES (24, 5, 2)
+GO
+SET IDENTITY_INSERT [dbo].[Employee_Allowance] OFF
+GO
+SET IDENTITY_INSERT [dbo].[Employees] ON 
+GO
+INSERT [dbo].[Employees] ([Id], [NIK], [Name], [DepartmentId], [PositionId]) VALUES (1, N'2171090211979003', N'Mikhae Lumban Siantar', 2, 2)
+GO
+INSERT [dbo].[Employees] ([Id], [NIK], [Name], [DepartmentId], [PositionId]) VALUES (2, N'2171090211979004', N'Rahmat', 2, 3)
+GO
+INSERT [dbo].[Employees] ([Id], [NIK], [Name], [DepartmentId], [PositionId]) VALUES (3, N'2171090211979005', N'Surya', 2, 4)
+GO
+INSERT [dbo].[Employees] ([Id], [NIK], [Name], [DepartmentId], [PositionId]) VALUES (4, N'2171090211979007', N'Fajar', 2, 5)
+GO
+INSERT [dbo].[Employees] ([Id], [NIK], [Name], [DepartmentId], [PositionId]) VALUES (5, N'2171090211979009', N'Yusuf', 1, 2)
+GO
+SET IDENTITY_INSERT [dbo].[Employees] OFF
+GO
+SET IDENTITY_INSERT [dbo].[Overtime] ON 
+GO
+INSERT [dbo].[Overtime] ([Id], [NIK], [TimeStart], [TimeFinish], [ActualHours], [CalculatedHours]) VALUES (1, N'2171090211979003', CAST(N'2024-04-21T23:25:00.000' AS DateTime), CAST(N'2024-04-22T01:00:00.000' AS DateTime), 2, 4)
+GO
+INSERT [dbo].[Overtime] ([Id], [NIK], [TimeStart], [TimeFinish], [ActualHours], [CalculatedHours]) VALUES (14, N'2171090211979004', CAST(N'2024-04-21T23:48:00.000' AS DateTime), CAST(N'2024-04-22T02:01:00.000' AS DateTime), 2, 4)
+GO
+SET IDENTITY_INSERT [dbo].[Overtime] OFF
+GO
+SET IDENTITY_INSERT [dbo].[Positon] ON 
+GO
+INSERT [dbo].[Positon] ([Id], [Name]) VALUES (1, N'Operator')
+GO
+INSERT [dbo].[Positon] ([Id], [Name]) VALUES (2, N'Technician')
+GO
+INSERT [dbo].[Positon] ([Id], [Name]) VALUES (3, N'Leader')
+GO
+INSERT [dbo].[Positon] ([Id], [Name]) VALUES (4, N'Supervisor')
+GO
+INSERT [dbo].[Positon] ([Id], [Name]) VALUES (5, N'Manager')
+GO
+SET IDENTITY_INSERT [dbo].[Positon] OFF
+GO
+/****** Object:  StoredProcedure [dbo].[sp_DeleteEmployee]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[sp_DeleteEmployee]
+	-- Add the parameters for the stored procedure here
+	@Id INT
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here 
+	IF EXISTS(SELECT TOP 1 1 FROM Local.dbo.Employees E 
+			  INNER JOIN Local.dbo.Overtime O ON O.NIK = E.NIK
+			  WHERE E.Id = @Id)
+	BEGIN
+		SELECT CAST(0 AS BIT) AS flag,'Fail' as message, 'Cannot Delete Employee, cause register in Overtime Table' as message_info
+		return
+	END
+
+	DELETE FROM Local.dbo.Employees WHERE Id = @Id
+	SELECT CAST(1 AS BIT) AS flag,'Success' as message, 'Delete Success' as message_info
+
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_DeleteOvertime]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[sp_DeleteOvertime]
+	-- Add the parameters for the stored procedure here
+	@NIK NVARCHAR(MAX)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	IF NOT EXISTS(SELECT TOP 1 1 FROM Local.dbo.Overtime WHERE NIK = @NIK)
+	BEGIN
+		SELECT CAST(0 AS BIT) flag, 'Fail' as message, 'Cannot fount NIK' as message_info
+		return;
+	END
+
+	DELETE FROM Local.dbo.Overtime WHERE NIK = @NIK
+	SELECT CAST(1 AS BIT) flag, 'Success' as message, 'Delete Success' as message_info
+
+
+
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_GetEmployee]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[sp_GetEmployee]
+	-- Add the parameters for the stored procedure here 
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here 
+	select e.Id,NIK,e.[Name],p.[Name] as Position ,d.[Name] as Department 
+    from Local.dbo.Employees e
+    inner join Local.dbo.Positon p on p.Id = e.PositionId
+    inner join Local.dbo.Department d on d.Id = e.DepartmentId
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_InsertEmployee]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+	CREATE PROCEDURE [dbo].[sp_InsertEmployee]
+	-- Add the parameters for the stored procedure here
+	@NIK NVARCHAR(MAX),
+	@NAME NVARCHAR(MAX),
+	@DepertmentId INT,
+	@PositionId INT,
+	@Allowance NVARCHAR(MAX)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	DECLARE @Id INT
+    DECLARE @Desc NVARCHAR(MAX)
+	DECLARE @LastEmployeeId INT
+
+
+	IF EXISTS (SELECT TOP 1 1 FROM Local.dbo.Employees WHERE NIK = @NIK)
+	BEGIN
+		SELECT CAST(0 AS BIT) AS flag, 'Fail' as message ,'This NIK already register' as message_info
+		RETURN
+	END
+	ELSE
+	BEGIN
+		INSERT INTO Local.dbo.Employees(NIK,Name,DepartmentId,PositionId) VALUES(@NIK,@NAME,@DepertmentId,@PositionId) 
+		SELECT @LastEmployeeId = SCOPE_IDENTITY() 
+		DECLARE InsertAllowance CURSOR FOR
+		select Id,[Desc] from Local.dbo.Allowance 
+		where [desc] in (select SplitValue from Local.dbo.SplitString(@Allowance,','))
+
+		OPEN InsertAllowance
+
+		FETCH NEXT FROM InsertAllowance INTO @Id, @Desc
+		WHILE @@FETCH_STATUS = 0
+		BEGIN 
+			Insert into Local.dbo.Employee_Allowance VALUES(@LastEmployeeId,@Id)
+			FETCH NEXT FROM InsertAllowance INTO @ID, @Name
+		END
+		CLOSE InsertAllowance
+		DEALLOCATE InsertAllowance
+		SELECT CAST(1 AS BIT) AS flag, 'Success' as message ,'Success Register' as message_info 
+	END 
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_InsertOvertime]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[sp_InsertOvertime]
+	-- Add the parameters for the stored procedure here
+	@NIK NVARCHAR(MAX),
+	@Timestart DATETIME,
+	@Timefinish DATETIME,
+	@ActualHours INT 
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	IF NOT EXISTS(SELECT TOP 1 1 FROM Local.dbo.Employees WHERE NIK = @NIK)
+	BEGIN
+		SELECT CAST(0 AS BIT) AS flag,'Fail' as message, 'NIK not found' as message_info
+		return;
+	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM Overtime WHERE NIK = @NIK)
+	BEGIN
+		SELECT CAST(0 AS BIT) AS flag,'Fail' as message, 'NIK already registered' as message_info
+	END
+
+	INSERT INTO Local.dbo.Overtime(NIK,TimeStart,TimeFinish,ActualHours,CalculatedHours)
+	VALUES(@NIK,@Timestart,@Timefinish,@ActualHours,@ActualHours*2) 
+	SELECT CAST(1 AS BIT) AS flag,'Success' as message, 'Success Add Overtime' as message_info
+
+
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_UpdateEmployee]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[sp_UpdateEmployee]
+	-- Add the parameters for the stored procedure here
+	@NIK NVARCHAR(MAX),
+	@NAME NVARCHAR(MAX),
+	@DepertmentId INT,
+	@PositionId INT,
+	@Allowance NVARCHAR(MAX)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	DECLARE @OldNIK NVARCHAR(MAX),
+	        @OldNAME NVARCHAR(MAX),
+	        @OldDepertmentId INT,
+	        @OldPositionId INT,
+	        @OldAllowance NVARCHAR(MAX),
+			@EmployeeId INT
+
+
+    -- Insert statements for procedure here 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM Local.dbo.Employees WHERE NIK = @NIK)
+	BEGIN
+		SELECT CAST(0 AS bit) flag, 'Fail' as message, 'NIK NOT REGISTER YET' as message_info
+		RETURN
+	END
+	 
+    SELECT @OldNIK = E.NIK,@OldNAME = E.Name,@OldDepertmentId = E.DepartmentId, @OldPositionId = E.PositionId
+	FROM Local.dbo.Employee_Allowance EA
+	INNER JOIN Local.dbo.Employees E ON E.Id = EA.EmployeeId
+	INNER JOIN Local.dbo.Allowance A ON A.Id = EA.AllowanceId
+	WHERE E.NIK = @NIK
+
+
+	SELECT @OldAllowance =
+    STUFF((SELECT ', ' + A.[Desc]
+           FROM Local.dbo.Employee_Allowance EA
+	       inner join Local.dbo.Allowance A ON A.Id = EA.AllowanceId
+	       WHERE EA.EmployeeId = 4
+           FOR XML PATH('')), 1, 2, '')  
+
+
+	IF(@NIK != @OldNIK OR @NAME != @OldNAME OR @DepertmentId != @OldDepertmentId OR @PositionId != @OldPositionId OR @Allowance != @OldAllowance)
+	BEGIN 
+			UPDATE Local.dbo.Employees SET [Name] = @NAME, DepartmentId = @DepertmentId, PositionId = @PositionId WHERE NIK = @NIK
+
+			SELECT @EmployeeId = Id FROM Employees WHERE NIK = @NIK 
+			DELETE Local.dbo.Employee_Allowance WHERE EmployeeId = @EmployeeId
+
+			DECLARE @Id INT
+			DECLARE @Desc NVARCHAR(MAX)
+			DECLARE InsertAllowance CURSOR FOR
+			select Id,[Desc] from Local.dbo.Allowance 
+			where [desc] in (select SplitValue from Local.dbo.SplitString(@Allowance,','))
+
+			OPEN InsertAllowance
+
+			FETCH NEXT FROM InsertAllowance INTO @Id, @Desc
+			WHILE @@FETCH_STATUS = 0
+			BEGIN 
+				Insert into Local.dbo.Employee_Allowance VALUES(@EmployeeId,@Id)
+				FETCH NEXT FROM InsertAllowance INTO @ID, @Name
+			END
+			CLOSE InsertAllowance
+			DEALLOCATE InsertAllowance
+			SELECT CAST(1 AS BIT) AS flag, 'Success' as message ,'Success Updated' as message_info 
+	END
+
+
+
+END
+GO
+/****** Object:  StoredProcedure [dbo].[sp_UpdateOverTime]    Script Date: 4/22/2024 1:45:17 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[sp_UpdateOverTime]
+	-- Add the parameters for the stored procedure here
+	@NIK NVARCHAR(MAX),
+	@Timestart DATETIME,
+	@Timefinish DATETIME,
+	@ActualHours INT 
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here 
+	DECLARE @OldNIK NVARCHAR(MAX),
+	        @OldTimestart DATETIME,
+	        @OldTimefinish DATETIME,
+	        @OldActualHours INT 
+
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM Local.dbo.Overtime WHERE NIK = @NIK)
+	BEGIN
+		SELECT CAST(0 AS BIT) flag, 'Fail' as message, 'NIK NOT FOUND IN OVERTIME DATA' as message_info;
+		return
+	END
+
+	SELECT @OldNIK = NIK, @OldTimestart = TimeStart, @OldTimefinish = TimeFinish,
+	@OldActualHours = ActualHours
+	FROM Local.dbo.Overtime WHERE NIK = @NIK
+
+	IF(@OldNIK != @NIK OR @OldTimestart != @Timestart OR @OldTimefinish = @Timefinish OR @OldActualHours != @ActualHours)
+	BEGIN
+		UPDATE Local.dbo.Overtime SET TimeStart = @Timestart, TimeFinish = @Timefinish,ActualHours = @ActualHours, CalculatedHours = @ActualHours*2
+		WHERE NIK = @NIK
+	END
+    
+	SELECT CAST(1 AS BIT) flag, 'Success' as message, 'Overtime Updated' as message_info
+
+
+END
+GO

@@ -1,0 +1,37 @@
+﻿
+
+@{
+
+}
+
+<!DOCTYPE html>
+
+
+@Styles.Render("~/bundles/css")
+@Scripts.Render("~/bundles/js")
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <a class="navbar-brand">Main Menu</a>
+            </div>
+        </div>
+    </nav>
+    <section>
+        <div class="row" style="margin-left:10px">
+            <button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Index", "Employee")'">Employee</button>
+            <button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Index", "OverTime")'">Over Time Entry</button>
+        </div>
+    </section>
+
+
+</body>
+</html>
+

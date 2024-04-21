@@ -1,0 +1,328 @@
+﻿@model  List<Employee.Models.EmployeeModel>
+
+
+@Styles.Render("~/bundles/css")
+@Scripts.Render("~/bundles/js")
+@Styles.Render("~/bundles/font")
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>EmployeeView</title>
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <a class="navbar-brand">LIST OF THE EMPLOYEE DATA</a>
+            </div>
+        </div>
+    </nav>
+    <section>
+        <div class="row">
+            <div class="col-md-11">
+                @*<button type="button" class="btn btn-primary pull-right" id="btnAdd">Create Employee</button>*@
+                <button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#EmployeeInfo">
+                    Add New
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-offset-2 col-md-8">
+                <div>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>NO</th>
+                                <th>NIK</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Position</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.NIK</td>
+                                    <td>@item.Name</td>
+                                    <td>@item.Department</td>
+                                    <td>@item.Position</td>
+                                    <td>
+                                        <!-- Tombol Edit -->
+                                        <button type="button" class="btn btn-warning btnEdit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <!-- Tombol Delete -->
+                                        <button type="button" class="btn btn-danger btnDelete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal fade" id="EmployeeInfo" tabindex="-1" role="dialog"  data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Employee Detail</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>NIK</label>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.TextBox("NIK", null, new { @id = "txtNIK"})
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>NAME</label>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.TextBox("NAME", null, new { @id = "txtNAME" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>DEPARTMENT</label>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.DropDownList("SelectedItemId", (IEnumerable<SelectListItem>)ViewBag.Departments, "Select an option", new { @id = "cbDepartment" })
+                            @*<select id="cbDepartment"></select>*@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>POSITION</label>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.DropDownList("SelectedItemId", (IEnumerable<SelectListItem>)ViewBag.Positions, "Select an option", new { @id = "cbPosition" })
+                            @*<select id="cbPosition"></select>*@
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label>Allowance</label>
+                        </div>
+                        <div class="col-md-3">
+                            @foreach (var row in ViewBag.Allowances)
+                            {
+                                <div class="row">
+                                    @Html.CheckBox($"{@row.Desc}", false)&nbsp;@Html.DisplayName($"{@row.Desc}")
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="ResetInput()">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btnSave">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+<script>
+
+
+    //untuk test
+    //$("#btnAdd").on("click", function () {
+    //    console.log("tekan")
+    //    $.ajax({
+    //        url: "/Employee/GetDepartmentPosition",
+    //        data: {},
+    //        dataType: "json",
+    //        async: true,
+    //        type: "GET",
+    //        error: function (data) {
+    //            alert(`${data.message} \n ${data.messages_info}`);
+    //        },
+    //        success: function (data) {
+    //            if (data.flag) {
+    //                console.log(data);
+    //                if (data.Position != "undefined") {
+    //                    $.each(data.Position, function (i) {
+    //                        var optionshtml = '<option value="' + data.Position[i].Id + '">' + data.Position[i].Name + '</option>';
+    //                        $("#cbPosition").append(optionshtml);
+    //                    });
+    //                }
+    //                if (data.Department != "undefined") {
+    //                    $.each(data.Department, function (i) {
+    //                        var optionshtml = '<option value="' + data.Department[i].Id + '">' + data.Department[i].Name + '</option>';
+    //                        $("#cbDepartment").append(optionshtml);
+    //                    });
+    //                }
+    //                $("#EmployeeInfo").modal('show');
+    //            }
+    //        }
+    //    });
+    //});
+
+    $("#cbPosition").on('change', function () { 
+
+        let LaptopLevel = ["Manager", "Supervisor"];
+        let PosLevel = $("#cbPosition option:selected").text()
+
+        if (PosLevel === "Manager") {  
+            $("#Meal").prop("disabled", true);
+            $("#Meal").prop("checked", false); 
+
+        }
+        else {
+            $("#Meal").prop("disabled", false); 
+        }
+
+        if ($.inArray(PosLevel, LaptopLevel) !== -1) { 
+            $("#Laptop").prop("disabled", false);
+        }
+        else { 
+            $("#Laptop").prop("disabled", true); 
+            $("#Laptop").prop("checked", false); 
+
+        } 
+    }) 
+    $("#btnSave").on('click', function () {
+
+        let Nik  = $("#txtNIK").val();  
+        let Name = $("#txtNAME").val();  
+        let Dept = $("#cbDepartment option:selected").val(); 
+        let Pos  = $("#cbPosition option:selected").val();  
+
+        let allowanceList = [];
+
+        $("#EmployeeInfo").find("input[type='checkbox']").each(function () { 
+            let checkbox = $(this);
+            let value = checkbox.prop("checked") ? checkbox.val() : !checkbox.val();
+            if (value) {
+                allowanceList.push(checkbox.attr("Id")) 
+            }
+        });
+
+        let combinedString = allowanceList.join(",");
+
+        if (Nik === "" || Name === "" || Dept === "" || Pos == "") {
+            alert("Please fill all field first !!!");
+            return;
+        }  
+
+        $.ajax({
+            url: $("#txtNIK").prop("disabled") ? "/Employee/UpdateEmployee" : "/Employee/InsertEmployee" ,
+            data: { NIK: Nik, NAME: Name, DepartmentId: parseInt(Dept), PositionId: parseInt(Pos), Allowance: combinedString },
+            dataType: "json",
+            async: true,
+            type: "GET",
+            error: function (data) {
+                alert(`${data.message} \n ${data.message_info}`);
+            },
+            success: function (data) {
+                if (data.flag) {
+                    window.alert(data.message_info);
+                    window.location.href = data.redirectUrl
+                }
+                else {
+                    alert(`${data.message} \n ${data.message_info}`);
+                }
+            }
+        });  
+    }) 
+    $(".btnEdit").on('click', function () {
+
+        let row = $(this).closest("tr");
+        let id = row.find("td:eq(0)").text();
+        $.ajax({
+            url: "/Employee/GetEmployeeDetailById",
+            data: { Id: id },
+            dataType: "json",
+            async: true,
+            type: "GET",
+            error: function (data) { 
+            },
+            success: function (data) {
+                if (data.flag) {
+                    if (data.EmployeeDetail != "undifined" || data.EmployeeDetail != null) { 
+                        $("#txtNIK").val(data.EmployeeDetail.NIK);
+                        $("#txtNIK").prop("disabled", true)
+                        $("#txtNAME").val(data.EmployeeDetail.Name); 
+                        $("#cbDepartment").val($("#cbDepartment option:contains('" + data.EmployeeDetail.Department + "')").val()); 
+                        $("#cbPosition").val($("#cbPosition option:contains('" + data.EmployeeDetail.Position + "')").val()).trigger('change'); 
+                    }
+                    if (data.AllowanceDetail != "undifined" || data.AllowanceDetail != null) {  
+
+                        $.each(data.AllowanceDetail, function (i) {  
+                            $(`#${data.AllowanceDetail[i].Allowance}`).prop("checked", true);
+                        })
+                    }
+
+                    $("#EmployeeInfo").modal('show'); 
+                }
+            }
+        }); 
+    }) 
+    $(".btnDelete").on('click', function () {
+        let row = $(this).closest("tr");
+        let id = row.find("td:eq(0)").text();
+        $.ajax({
+            url: "/Employee/DeleteEmployee",
+            data: { Id: id },
+            dataType: "json",
+            async: true,
+            type: "GET",
+            error: function (data) {
+                alert(`${data.message} \n ${data.message_info}`);
+            },
+            success: function (data) {
+                if (data.flag) {
+                    window.alert(data.message_info);
+                    window.location.href = data.redirectUrl
+                }
+                else {
+                    alert(`${data.message} \n ${data.message_info}`);
+                }
+            }
+        }); 
+    });
+
+
+    function ResetInput() {
+        $("#EmployeeInfo").find("input").each(function () {
+            let Element = $(this);
+            var inputType = $(this).attr("type"); 
+            Element.prop("disabled", false)
+             
+            if (inputType == "text") {
+                Element.val("");
+            }
+            else if (inputType == "checkbox") {
+                Element.prop("checked", false); 
+            } 
+        });
+        $("#EmployeeInfo").find("select").each(function () {
+            let Element = $(this);
+            Element.prop("selectedIndex", 0);
+        });
+    }
+
+</script>
